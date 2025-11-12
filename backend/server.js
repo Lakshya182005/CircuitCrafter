@@ -41,5 +41,5 @@ app.use("/api/scans", scanRoutes);
 
 app.get("/", (req, res) => res.send("CircuitCrafter API running..."));
 
-
+const PORT = 5000;
 app.listen(PORT, () => console.log(`Server working fine on ${PORT}`));
