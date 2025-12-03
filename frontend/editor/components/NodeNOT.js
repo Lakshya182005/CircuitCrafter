@@ -1,0 +1,26 @@
+import React, { memo } from 'react';
+import { Handle, Position } from 'reactflow';
+
+const NodeNOT = ({ data, isConnectable }) => {
+    return (
+        <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400 min-w-[100px] text-center">
+            <div className="font-bold text-sm text-stone-800">NOT</div>
+            <Handle
+                type="target"
+                position={Position.Left}
+                id="in"
+                style={{ background: '#555' }}
+                isConnectable={isConnectable}
+            />
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="out"
+                style={{ background: '#555' }}
+                isConnectable={isConnectable}
+            />
+        </div>
+    );
+};
+
+export default memo(NodeNOT);

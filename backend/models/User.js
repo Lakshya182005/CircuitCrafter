@@ -1,0 +1,37 @@
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        minlength: 3
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        lowercase: true
+    },
+    password: {
+        type: String,
+        required: function () { return !this.googleId; } // Password required if not using Google Auth
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    avatar: {
+        type: String,
+        default: ''
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+module.exports = mongoose.model('User', userSchema);
