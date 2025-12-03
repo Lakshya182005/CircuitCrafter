@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
 import Link from 'next/link';
 import { motion } from "framer-motion";
 import { ArrowLeft, Share2 } from "lucide-react";
@@ -32,19 +33,15 @@ function EditorContent() {
     useEffect(() => {
         const fetchCircuit = async () => {
             if (circuitId && user) {
-                const token = localStorage.getItem('token');
-                const res = await fetch(`http://localhost:5001/api/circuits/${circuitId}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                if (res.ok) {
-                    const data = await res.json();
+                try {
+                    const data = await api.get(`/api/circuits/${circuitId}`);
                     setInitialData(data);
                     setCircuitName(data.name);
                     setIsPublic(data.isPublic || false);
                     setType(data.type || 'Combinational');
                     setDescription(data.description || '');
+                } catch (error) {
+                    console.error("Failed to fetch circuit:", error);
                 }
             }
             setLoading(false);
@@ -56,7 +53,6 @@ function EditorContent() {
     const handleSave = async () => {
         if (!user) return alert('Please sign in to save');
 
-        const token = localStorage.getItem('token');
         const { nodes, edges } = canvasRef.current.getCircuitData();
 
         const body = {
@@ -72,22 +68,14 @@ function EditorContent() {
             body._id = circuitId;
         }
 
-        const res = await fetch('http://localhost:5001/api/circuits/save', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(body),
-        });
-
-        if (res.ok) {
-            const data = await res.json();
+        try {
+            const data = await api.post('/api/circuits/save', body);
             alert('Circuit saved!');
             if (!circuitId) {
                 router.push(`/editor?id=${data._id}`);
             }
-        } else {
+        } catch (error) {
+            console.error("Failed to save circuit:", error);
             alert('Error saving circuit');
         }
     };

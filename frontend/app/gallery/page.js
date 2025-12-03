@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
 import { motion } from "framer-motion";
 import { Search, Sparkles, TrendingUp, Clock } from "lucide-react";
 import { Navbar } from '@/components/layout/Navbar';
@@ -35,22 +36,10 @@ export default function Gallery() {
             limit: 9,
         });
 
-        const headers = {};
-        if (user) {
-            const token = localStorage.getItem('token');
-            headers.Authorization = `Bearer ${token}`;
-        }
-
         try {
-            const res = await fetch(`http://localhost:5001/api/circuits/public?${queryParams}`, {
-                headers,
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setCircuits(data.circuits);
-                setTotalPages(data.totalPages);
-            }
+            const data = await api.get(`/api/circuits/public?${queryParams}`);
+            setCircuits(data.circuits);
+            setTotalPages(data.totalPages);
         } catch (error) {
             console.error("Failed to fetch gallery circuits:", error);
         }

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
 import { motion } from "framer-motion";
 import { Search, LayoutGrid, List, SlidersHorizontal } from "lucide-react";
 import { Navbar } from '@/components/layout/Navbar';
@@ -37,7 +38,6 @@ export default function Dashboard() {
     const fetchCircuits = useCallback(async () => {
         if (user) {
             setLoading(true);
-            const token = localStorage.getItem('token');
             const queryParams = new URLSearchParams({
                 search,
                 sort,
@@ -47,16 +47,9 @@ export default function Dashboard() {
             });
 
             try {
-                const res = await fetch(`http://localhost:5001/api/circuits/mine?${queryParams}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setCircuits(data.circuits);
-                    setTotalPages(data.totalPages);
-                }
+                const data = await api.get(`/api/circuits/mine?${queryParams}`);
+                setCircuits(data.circuits);
+                setTotalPages(data.totalPages);
             } catch (error) {
                 console.error("Failed to fetch circuits:", error);
             }
@@ -70,31 +63,21 @@ export default function Dashboard() {
 
     const handleDelete = async (id) => {
         if (confirm('Are you sure you want to delete this circuit?')) {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5001/api/circuits/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (res.ok) {
+            try {
+                await api.delete(`/api/circuits/${id}`);
                 fetchCircuits();
+            } catch (error) {
+                console.error("Failed to delete circuit:", error);
             }
         }
     };
 
     const handleDuplicate = async (id) => {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:5001/api/circuits/copy/${id}`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        if (res.ok) {
+        try {
+            await api.post(`/api/circuits/copy/${id}`);
             fetchCircuits();
+        } catch (error) {
+            console.error("Failed to duplicate circuit:", error);
         }
     };
 
